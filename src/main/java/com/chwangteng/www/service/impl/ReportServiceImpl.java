@@ -49,6 +49,7 @@ public class ReportServiceImpl implements ReportService {
 
         ReportExample reportExample = new ReportExample();
         reportExample.createCriteria().andStudentIdIn(peersids);
+        reportExample.setOrderByClause("submit_time desc");
         List peersReport =  reportMapper.selectByExampleWithBLOBs(reportExample);
 
         return peersReport;
@@ -70,9 +71,13 @@ public class ReportServiceImpl implements ReportService {
         for (int i=0;i<students.size();i++){
             studentids.add(students.get(i).getId());
         }
-
+        // TODO 条件查询还没有起作用
         ReportExample reportExample = new ReportExample();
         reportExample.createCriteria().andStudentIdIn(studentids);
+        if (viewStudentsReportParam != null){
+            reportExample.createCriteria().andSubmitTimeBetween(viewStudentsReportParam.getStartDate(), viewStudentsReportParam.getEndDate());
+        }
+        reportExample.setOrderByClause("submit_time desc");
         List peersReport =  reportMapper.selectByExampleWithBLOBs(reportExample);
 
         if(peersReport.size()==0||peersReport==null)

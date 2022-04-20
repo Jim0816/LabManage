@@ -6,6 +6,10 @@ public class ViewStudentsReportParam {
     private Integer pageIndex;
     private Integer pageSize;
 
+    private String startDate;
+
+    private String endDate;
+
     public Integer getPageIndex() {
         return pageIndex;
     }
@@ -20,5 +24,21 @@ public class ViewStudentsReportParam {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
     }
 }

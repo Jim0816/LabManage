@@ -470,6 +470,11 @@ public class ReportExample {
             return (Criteria) this;
         }
 
+        public Criteria andSubmitTimeBetween(String value1, String value2) {
+            addCriterion("submit_time between", value1, value2, "submitTime");
+            return (Criteria) this;
+        }
+
         public Criteria andSubmitTimeNotBetween(Date value1, Date value2) {
             addCriterion("submit_time not between", value1, value2, "submitTime");
             return (Criteria) this;

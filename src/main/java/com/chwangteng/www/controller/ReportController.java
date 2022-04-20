@@ -9,6 +9,7 @@ import com.chwangteng.www.pattern.builder.Director;
 import com.chwangteng.www.pattern.builder.StandardBuilder;
 import com.chwangteng.www.pattern.builder.Title;
 import com.chwangteng.www.pojo.*;
+import com.chwangteng.www.pojo.dto.DateParam;
 import com.chwangteng.www.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -58,7 +59,7 @@ public class ReportController {
 
         Builder builder=new StandardBuilder(studentname);
         Director director=new Director(builder);
-        Title title=director.construct();
+        Title title = director.construct();
         String finaltitle = title.toString();
 
 
@@ -228,11 +229,18 @@ public class ReportController {
 
     //查看自己学生的周报
     @RequestMapping("/viewStudentsReport.action")
-    public ModelAndView viewStudentsReport(HttpSession session){
+    public ModelAndView viewStudentsReport(HttpSession session, @RequestBody DateParam dateParam){
         int currentteacher = Integer.parseInt(session.getAttribute(ConstVar._SESSION_USER_ID_).toString());
         int usertype = Integer.parseInt(session.getAttribute(ConstVar._SESSION_USER_TYPE_).toString());
         if(usertype==ConstVar._TEACHER_){
-            List<ReportWithBLOBs> reports = (List<ReportWithBLOBs>) reportService.viewStudentsReport(currentteacher, null);
+            ViewStudentsReportParam viewStudentsReportParam = null;
+            if (dateParam != null && dateParam.getStartDate() != null && dateParam.getEndDate() != null){
+                viewStudentsReportParam = new ViewStudentsReportParam();
+                viewStudentsReportParam.setStartDate(dateParam.getStartDate());
+                viewStudentsReportParam.setEndDate(dateParam.getEndDate());
+            }
+
+            List<ReportWithBLOBs> reports = (List<ReportWithBLOBs>) reportService.viewStudentsReport(currentteacher, viewStudentsReportParam);
             if(reports!=null){
                 ModelAndView mv = new ModelAndView();
                 mv.addObject(ConstVar._KEY_DATA_,reports);

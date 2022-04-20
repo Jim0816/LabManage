@@ -237,6 +237,38 @@
 <script src="js/busy-load/dist/app.min.js"></script>
 </body>
 <script>
+    // length表示字符的长度 汉字长度为2，其他为1
+    function formatBrief(html, length) {
+        // 获取html中文本信息
+        let text = getTextFromHtml(html)
+        let res = ""
+        let size = 0
+        let cur = 0
+        while (size < length){
+            let c = cur < text.length ? text.charAt(cur++) : '略'
+            res += c
+            size += countStrLength(c)
+        }
+        return res;
+    }
+
+    function getTextFromHtml(html){
+        var input = html;
+        return input.replace(/<(style|script|iframe)[^>]*?>[\s\S]+?<\/\1\s*>/gi, '').replace(/<[^>]+?>/g, '').replace(/\s+/g, '').replace(/ /g, '').replace(/>/g, '').replace(/&nbsp;/g, '');
+    }
+
+    function countStrLength(str) {
+        var len = 0;
+        for (var i=0; i< str.length; i++) {
+            if (str.charCodeAt(i)>127 || str.charCodeAt(i)==94) {
+                len += 2;
+            } else {
+                len ++;
+            }
+        }
+        return len;
+    }
+
     function timestampToTime(timestamp) {
         if (timestamp == null)
             return null
@@ -325,7 +357,8 @@
 
                 for (var i = 0; i < response.data.length; i++) {
 
-                    var brief = response.data[i].thisWeek.substring(0,50) + "<br> ...";
+                    //var brief = response.data[i].thisWeek.substring(0,50) + "<br> ...";
+                    var brief = formatBrief(response.data[i].thisWeek, 100) + "<br> . . .";
 
                     if (response.data[i].score >= 90) {
                         $("#row_to_insert").append(

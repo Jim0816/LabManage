@@ -107,6 +107,7 @@
       order by ${orderByClause}
     </if>
   </select>
+
   <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.chwangteng.www.pojo.ReportExample" >
     select
     <if test="distinct" >
