@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service("reportService")
@@ -73,9 +74,10 @@ public class ReportServiceImpl implements ReportService {
         }
         // TODO 条件查询还没有起作用
         ReportExample reportExample = new ReportExample();
-        reportExample.createCriteria().andStudentIdIn(studentids);
+        ReportExample.Criteria criteria = reportExample.createCriteria().andStudentIdIn(studentids);
         if (viewStudentsReportParam != null){
-            reportExample.createCriteria().andSubmitTimeBetween(viewStudentsReportParam.getStartDate(), viewStudentsReportParam.getEndDate());
+            criteria.andSubmitTimeStrGreaterThanOrEqualTo(viewStudentsReportParam.getStartDate())
+                    .andSubmitTimeStrLessThanOrEqualTo(viewStudentsReportParam.getEndDate());
         }
         reportExample.setOrderByClause("submit_time desc");
         List peersReport =  reportMapper.selectByExampleWithBLOBs(reportExample);

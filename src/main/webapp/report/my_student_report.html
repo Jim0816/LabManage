@@ -770,7 +770,7 @@
         })
 
         $("#query_button").click(function (){
-            $("row_to_insert").remove()
+            $("#row_to_insert").empty()
             let startDate = $("#query_start_date").val()
             let endDate = $("#query_end_date").val()
             let query = JSON.stringify({

@@ -445,12 +445,22 @@ public class ReportExample {
             return (Criteria) this;
         }
 
+        public Criteria andSubmitTimeStrGreaterThanOrEqualTo(String value){
+            addCriterion("submit_time >=", value, "submitTime");
+            return (Criteria) this;
+        }
+
         public Criteria andSubmitTimeLessThan(Date value) {
             addCriterion("submit_time <", value, "submitTime");
             return (Criteria) this;
         }
 
         public Criteria andSubmitTimeLessThanOrEqualTo(Date value) {
+            addCriterion("submit_time <=", value, "submitTime");
+            return (Criteria) this;
+        }
+
+        public Criteria andSubmitTimeStrLessThanOrEqualTo(String value) {
             addCriterion("submit_time <=", value, "submitTime");
             return (Criteria) this;
         }
