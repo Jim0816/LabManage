@@ -2,7 +2,9 @@ package com.chwangteng.www.mapper;
 
 import com.chwangteng.www.pojo.Student;
 import com.chwangteng.www.pojo.StudentExample;
+
 import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 public interface StudentMapper {
@@ -27,4 +29,8 @@ public interface StudentMapper {
     int updateByPrimaryKeySelective(Student record);
 
     int updateByPrimaryKey(Student record);
+
+    String getStudentNameById(Integer id);
+
+    String getStudentUserNameByid(int studentId);
 }
