@@ -1,5 +1,6 @@
 package com.chwangteng.www.service.impl;
 
+import com.chwangteng.www.Utils.DocUtil;
 import com.chwangteng.www.mapper.ReportMapper;
 import com.chwangteng.www.mapper.StudentMapper;
 import com.chwangteng.www.mapper.TeacherMapper;
@@ -14,15 +15,19 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import org.apache.tools.zip.ZipUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service("reportService")
 public class ReportServiceImpl implements ReportService {
@@ -102,7 +107,7 @@ public class ReportServiceImpl implements ReportService {
      * @date 2022/4/24 18:54
      **/
     @Override
-    public boolean downDoc(List<ReportWithBLOBs> reports) {
+    public void downDoc(List<ReportWithBLOBs> reports) {
         for (ReportWithBLOBs reportWithBLOBs : reports) {
             int studentId = reportWithBLOBs.getStudentId();
             String studentName = studentMapper.getStudentNameById(studentId);
@@ -137,8 +142,10 @@ public class ReportServiceImpl implements ReportService {
             export(map);
             System.out.println("test");
         }
-        return true;
+
     }
+
+
 
     /**
      * @return String
@@ -188,15 +195,16 @@ public class ReportServiceImpl implements ReportService {
             Configuration configuration = new Configuration();
             configuration.setDefaultEncoding("UTF-8");
             //模板文件配置路径
-            configuration.setDirectoryForTemplateLoading(new File("F:\\LabManage\\LabManage-main\\LabManage\\src\\main\\webapp\\WEB-INF\\word"));
+            configuration.setDirectoryForTemplateLoading(new File(DocUtil.modelPath));
             configuration.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE_HANDLER);
             //文件输出路径,文件名
-            File f2 = new File("E:\\组会周报\\" + map.get("studentName"));
-            boolean flag2 = f2.mkdirs();         //使用mkdir()方法创建一个文件夹
-            File outFile = new File("E:\\组会周报\\" + map.get("studentName") + "\\" + map.get("docName") + ".doc");
+            File f2 = new File(DocUtil.serverPath + map.get("studentName"));
+            if(!f2.getParentFile().exists()) f2.getParentFile().mkdirs();         //使用mkdirs()方法创建一个文件夹
+            File outFile = new File(DocUtil.serverPath + map.get("studentName") + "\\" + map.get("docName") + ".doc");
+            if(!outFile.getParentFile().exists()) outFile.getParentFile().mkdirs();
             //扫描模板路径下 模板文件
             Template template = configuration.getTemplate("groupMeetingTemplate.xml", "UTF-8");
-            Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), "UTF-8"), 10240);
+            Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile), "UTF-8"), DocUtil.BUFFERSIZE);
             template.process(map, out);
             out.flush();
             out.close();
@@ -205,6 +213,177 @@ public class ReportServiceImpl implements ReportService {
         } catch (TemplateException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        }
+    }
+    /**
+     * @description TODO 将文件夹压缩成zip 并且保留原目录结构
+     * @return
+     * @exception
+     * @author Gcy
+     * @date 2022/5/15 16:06
+     **/
+    @Override
+    public void toZip(String srcDir, FileOutputStream out, boolean KeepDirStructure)
+            throws RuntimeException{
+        long start = System.currentTimeMillis();
+        ZipOutputStream zos = null ;
+        try {
+            zos = new ZipOutputStream(out);
+            File sourceFile = new File(srcDir);
+            compress(sourceFile,zos,sourceFile.getName(),KeepDirStructure);
+            long end = System.currentTimeMillis();
+            System.out.println("压缩完成，耗时：" + (end - start) +" ms");
+        } catch (Exception e) {
+            throw new RuntimeException("zip error from ZipUtils",e);
+        }finally{
+            if(zos != null){
+                try {
+                    zos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+  /**
+   * @description TODO 删除服务器上缓存文件
+   * @return
+   * @exception
+   * @author Gcy
+   * @date 2022/5/15 16:35
+   **/
+    public boolean del(String fileName) {
+        File file = new File(fileName);  // fileName是路径或者file.getPath()获取的文件路径
+        if (file.exists()) {
+            if (file.isFile()) {
+                return deleteFile(fileName);  // 是文件，调用删除文件的方法
+            } else {
+                return deleteDirectory(fileName);  // 是文件夹，调用删除文件夹的方法
+            }
+        } else {
+            System.out.println("文件或文件夹删除失败：" + fileName);
+            return false;
+        }
+    }
+
+
+    /**
+     * @description TODO 删除文件
+     * @return 删除成功返回true,失败返回false
+     * @exception
+     * @param fileName 文件名
+     * @author Gcy
+     * @date 2022/5/15 16:35
+     **/
+    public boolean deleteFile(String fileName) {
+        File file = new File(fileName);
+        if (file.isFile() && file.exists()) {
+            file.delete();
+            System.out.println("删除文件成功：" + fileName);
+            return true;
+        } else {
+            System.out.println("删除文件失败：" + fileName);
+            return false;
+        }
+    }
+
+    /**
+     * @description TODO 删除文件夹，删除文件夹需要把包含的文件及文件夹先删除，才能成功
+     * @return 删除成功返回true,失败返回false
+     * @exception
+     * @param directory 文件名
+     * @author Gcy
+     * @date 2022/5/15 16:35
+     **/
+    public boolean deleteDirectory(String directory) {
+        // directory不以文件分隔符（/或\）结尾时，自动添加文件分隔符，不同系统下File.separator方法会自动添加相应的分隔符
+        if (!directory.endsWith(File.separator)) {
+            directory = directory + File.separator;
+        }
+        File directoryFile = new File(directory);
+        // 判断directory对应的文件是否存在，或者是否是一个文件夹
+        if (!directoryFile.exists() || !directoryFile.isDirectory()) {
+            System.out.println("文件夹删除失败，文件夹不存在" + directory);
+            return false;
+        }
+        boolean flag = true;
+        // 删除文件夹下的所有文件和文件夹
+        File[] files = directoryFile.listFiles();
+        for (int i = 0; i < files.length; i++) {  // 循环删除所有的子文件及子文件夹
+            // 删除子文件
+            if (files[i].isFile()) {
+                flag = deleteFile(files[i].getAbsolutePath());
+                if (!flag) {
+                    break;
+                }
+            } else {  // 删除子文件夹
+                flag = deleteDirectory(files[i].getAbsolutePath());
+                if (!flag) {
+                    break;
+                }
+            }
+        }
+
+        if (!flag) {
+            System.out.println("删除失败");
+            return false;
+        }
+        // 最后删除当前文件夹
+        if (directoryFile.delete()) {
+            System.out.println("删除成功：" + directory);
+            return true;
+        } else {
+            System.out.println("删除失败：" + directory);
+            return false;
+        }
+    }
+
+    /**
+    * @description TODO 递归压缩文件
+    * @return
+    * @exception
+    * @author Gcy
+    * @date 2022/5/15 16:06
+    **/
+    private static void compress(File sourceFile, ZipOutputStream zos, String name,
+                                 boolean KeepDirStructure) throws Exception{
+        byte[] buf = new byte[10240];
+        if(sourceFile.isFile()){
+            // 向zip输出流中添加一个zip实体，构造器中name为zip实体的文件的名字
+            zos.putNextEntry(new ZipEntry(name));
+            // copy文件到zip输出流中
+            int len;
+            FileInputStream in = new FileInputStream(sourceFile);
+            while ((len = in.read(buf)) != -1){
+                zos.write(buf, 0, len);
+            }
+            // Complete the entry
+            zos.closeEntry();
+            in.close();
+        } else {
+            File[] listFiles = sourceFile.listFiles();
+            if(listFiles == null || listFiles.length == 0){
+                // 需要保留原来的文件结构时,需要对空文件夹进行处理
+                if(KeepDirStructure){
+                    // 空文件夹的处理
+                    zos.putNextEntry(new ZipEntry(name + "/"));
+                    // 没有文件，不需要文件的copy
+                    zos.closeEntry();
+                }
+            }else {
+                for (File file : listFiles) {
+                    // 判断是否需要保留原来的文件结构
+                    if (KeepDirStructure) {
+                        // 注意：file.getName()前面需要带上父文件夹的名字加一斜杠,
+                        // 不然最后压缩包中就不能保留原来的文件结构,即：所有文件都跑到压缩包根目录下了
+                        compress(file, zos, name + "/" + file.getName(),KeepDirStructure);
+                    } else {
+                        compress(file, zos, file.getName(),KeepDirStructure);
+                    }
+
+                }
+            }
         }
     }
 

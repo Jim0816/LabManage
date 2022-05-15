@@ -810,16 +810,24 @@
                 contentType: "application/json",
                 data: query
             }).done(function (response) {
-                swal({
-                    title: "提交失败",
-                    text: response.message,
-                    type: "success",
-                    timer: 1000,
-                    showConfirmButton: false
-                })
-            })
 
+            })
         })
+        //data为后端返回得文件流，filename为文件得名称
+        function  download(data, filename) {
+            let url = window.URL.createObjectURL(
+                // type属性值将影响下载文件的类型
+                new Blob([data], { type: 'application/octet-stream' })
+            )
+            let link = document.createElement('a')
+            link.style.display = 'none'
+            link.href = url
+            link.setAttribute('download', filename)
+            document.body.appendChild(link)
+            link.click()
+        }
+
+
     });
 
 
