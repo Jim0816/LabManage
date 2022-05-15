@@ -76,7 +76,7 @@ public class DownDocController {
         }
         in.close();
         out.close();
-        //删除服务器缓存文件
+        //删除服务器缓存文件.
         System.out.println(reportService.del(DocUtil.zipSourcePath));
         System.out.println(reportService.del(DocUtil.zipPath));
     }
