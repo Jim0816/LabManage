@@ -116,7 +116,6 @@
                 <!-- /.col-lg-12 -->
             </div>
 
-
             <div id="reportmodal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog"
                  aria-labelledby="myLargeModalLabel" aria-hidden="true" style="display: none;">
                 <div class="modal-dialog modal-lg">
@@ -507,7 +506,6 @@
         }).done(function (response) {
             if (undefined === response.code) {
                 externalrespnse = response
-
                 console.log(response.data)
                 if (response.data == null || response.data.length == 0) {
                     $("#row_to_insert").append(
@@ -799,9 +797,9 @@
             let endDate = $("#load_end_date").val()
             let query = JSON.stringify({
                 startDate: startDate,
-                endDate: endDate
+                endDate: endDate,
+                identify: 'teacher'
             });
-
 
             $.ajax({
                 type: "POST",
@@ -810,16 +808,16 @@
                 contentType: "application/json",
                 data: query
             }).done(function (response) {
-                swal({
-                    title: "提交失败",
-                    text: response.message,
-                    type: "success",
-                    timer: 1000,
-                    showConfirmButton: false
-                })
+                console.log(response)
+                console.log(document.location.host)
+                let url = 'http://' + document.location.host + '/' + response['data']
+                console.log(url)
+                location.href = url;
             })
-
         })
+
+
+
     });
 
 

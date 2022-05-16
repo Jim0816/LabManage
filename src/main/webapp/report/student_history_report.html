@@ -29,6 +29,10 @@
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+    <!--日期选择器-->
+    <link href="bootstrap/dist/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+    <script src="../report/js/moment.js"></script>
 </head>
 
 <body class="fix-header">
@@ -110,8 +114,7 @@
                 <!-- /.col-lg-12 -->
             </div>
 
-
-        <div id = "reportmodal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="display: none;">
+            <div id = "reportmodal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="display: none;">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -151,21 +154,69 @@
             <!-- /.modal-dialog -->
         </div>
 
+            <div id="loadWordmodal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog"
+                 aria-labelledby="myLargeModalLabel" aria-hidden="true" style="display: none;">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                            <h4 class="modal-title"><span>批量下载周报</span></h4></div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="control-label">开始日期</label>
+                                <div class='input-group date' id='datetimepicker3'>
+                                    <input type='text' id="load_start_date" class="form-control"/>
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">截至日期</label>
+                                <div class='input-group date' id='datetimepicker4'>
+                                    <input type='text' id="load_end_date" class="form-control"/>
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="file_name_format" class="control-label">命名格式 (默认名称：学号-姓名-提交日期.doxc)</label>
+                                <input type="text" class="form-control" id="file_name_format"
+                                       placeholder="暂时不支持自定义文件名称格式" readonly>
+                            </div>
+                            <button class="btn btn-success waves-effect waves-light" type="button"
+                                    id="submit_load_button">
+                                    <span class="btn-label">
+                                        <i class="fa fa-file"></i>
+                                    </span>下载
+                            </button>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger waves-effect text-left" data-dismiss="modal">
+                                关闭
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.modal-content -->
+                </div>
+                <!-- /.modal-dialog -->
+            </div>
 
             <div class="row" id="row_to_insert">
 <!--                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-                    <a href="javascript:void(0)">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">标题<span class="label label-info m-l-5">分数</span></div>
-                        <div class="panel-wrapper collapse in">
-                            <div class="panel-body">
-                                <p>内容，需要限制展示字数</p>
-                            </div>
+                <a href="javascript:void(0)">
+                <div class="panel panel-default">
+                    <div class="panel-heading">标题<span class="label label-info m-l-5">分数</span></div>
+                    <div class="panel-wrapper collapse in">
+                        <div class="panel-body">
+                            <p>内容，需要限制展示字数</p>
                         </div>
                     </div>
-                    </a>
-                </div>-->
-            </div>
+                </div>
+                </a>
+            </div>-->
+        </div>
 
             <!-- ============================================================== -->
             <!-- Right sidebar -->
@@ -275,6 +326,7 @@
 <script src="../plugins/bower_components/sweetalert/jquery.sweet-alert.custom.js"></script>
 <!--遮罩插件-->
 <script src="js/busy-load/dist/app.min.js"></script>
+<script src="bootstrap/dist/js/bootstrap-datetimepicker.min.js"></script>
 </body>
 <script>
     // length表示字符的长度 汉字长度为2，其他为1
@@ -323,6 +375,50 @@
         return Y + M + D + h + m + s;
     }
 
+    // 初始化日期组件
+    function initDateTools(start, end) {
+        let picker1 = $('#datetimepicker1').datetimepicker({
+            format: 'YYYY-MM-DD',
+            locale: moment.locale('zh-cn'),
+            //minDate: '2016-7-1'
+        });
+        let picker2 = $('#datetimepicker2').datetimepicker({
+            format: 'YYYY-MM-DD',
+            locale: moment.locale('zh-cn')
+        });
+        let picker3 = $('#datetimepicker3').datetimepicker({
+            format: 'YYYY-MM-DD',
+            locale: moment.locale('zh-cn'),
+            //minDate: '2016-7-1'
+        });
+        let picker4 = $('#datetimepicker4').datetimepicker({
+            format: 'YYYY-MM-DD',
+            locale: moment.locale('zh-cn')
+        });
+
+        $("#query_start_date").val(start)
+        $("#query_end_date").val(end)
+        $("#load_start_date").val(start)
+        $("#load_end_date").val(end)
+
+        /*picker1.on('dp.change', function (e) {
+            picker2.data('DateTimePicker').minDate(e.date);
+            console.log(e.date)
+        });
+
+        picker2.on('dp.change', function (e) {
+            picker1.data('DateTimePicker').maxDate(e.date);
+        });
+
+        picker3.on('dp.change', function (e) {
+            picker2.data('DateTimePicker').minDate(e.date);
+        });
+        //动态设置最大值
+        picker4.on('dp.change', function (e) {
+            picker1.data('DateTimePicker').maxDate(e.date);
+        });*/
+    }
+
     //暂存response
     var externalrespnse;
 
@@ -363,6 +459,11 @@
 
     $(document).ready(function () {
 
+        let today = moment().format('YYYY-MM-DD');
+        let last7 = moment().subtract('days', 7).format('YYYY-MM-DD');
+
+        initDateTools(last7, today)
+
         // 显示加载中遮罩
         $("#page-wrapper").busyLoad("show", {
             text: "加载中 ...",
@@ -383,7 +484,6 @@
             $("#page-wrapper").busyLoad("hide");
 
         }).done(function (response) {
-
             if (undefined === response.code) {
 
                 externalrespnse = response
@@ -513,84 +613,121 @@
                 confirmButtonText: "确定",
             })
         })
-    })
 
+        $("#delete_button").click(function () {
 
-    $("#delete_button").click(function () {
-
-        swal({
-            title: "确定删除周报吗?",
-            text: "删除后一切数据无法恢复!",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: "删除",
-            cancelButtonText:"取消",
-            closeOnConfirm: false
-        }, function(){
+            swal({
+                title: "确定删除周报吗?",
+                text: "删除后一切数据无法恢复!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "删除",
+                cancelButtonText:"取消",
+                closeOnConfirm: false
+            }, function(){
 
 
 
 
-            //do delete
-            // 显示加载中遮罩
-            $("#page-wrapper").busyLoad("show", {
-                text: "提交中 ...",
-                animation: "fade",
-                background: "rgba(0, 0, 0, 0.86)",
-                spinner: "cube-grid"
-            });
-            //发送请求
-            $.ajax({
-                type: "POST",
-                url: "/report/deleteReport.action",
-                dataType: "json",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    id:$("#hiddenid").val()
-                })
-            }).always(function () {
-                //隐藏加载中遮罩
-                $("#page-wrapper").busyLoad("hide");
-
-            }).done(function (response) {
-
-                if (undefined === response.code) {
-                    swal({
-                        title: "删除成功",
-                        text: response.message,
-                        type: "success",
-                        timer: 1000,
+                //do delete
+                // 显示加载中遮罩
+                $("#page-wrapper").busyLoad("show", {
+                    text: "提交中 ...",
+                    animation: "fade",
+                    background: "rgba(0, 0, 0, 0.86)",
+                    spinner: "cube-grid"
+                });
+                //发送请求
+                $.ajax({
+                    type: "POST",
+                    url: "/report/deleteReport.action",
+                    dataType: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        id:$("#hiddenid").val()
                     })
-                    location.reload()
+                }).always(function () {
+                    //隐藏加载中遮罩
+                    $("#page-wrapper").busyLoad("hide");
 
-                }else {
+                }).done(function (response) {
+
+                    if (undefined === response.code) {
+                        swal({
+                            title: "删除成功",
+                            text: response.message,
+                            type: "success",
+                            timer: 1000,
+                        })
+                        location.reload()
+
+                    }else {
+                        swal({
+                            title: "删除失败",
+                            text: response.message,
+                            type: "error",
+                            timer: 1000,
+                            showConfirmButton: false
+                        })
+                    }
+
+                }).fail(function () {
                     swal({
-                        title: "删除失败",
-                        text: response.message,
+                        title: "通信失败",
+                        text: "请检查网络",
                         type: "error",
-                        timer: 1000,
-                        showConfirmButton: false
+                        showConfirmButton: true,
+                        confirmButtonText: "确定",
                     })
-                }
-
-            }).fail(function () {
-                swal({
-                    title: "通信失败",
-                    text: "请检查网络",
-                    type: "error",
-                    showConfirmButton: true,
-                    confirmButtonText: "确定",
                 })
-            })
 
+
+
+
+            })
 
 
 
         })
 
+        $("#load_button").click(function () {
+            $("#insert_telephone").val("")
+            $("#insert_name").val("")
+            $("#insert_username").val("")
+            $("#insert_mail").val("")
+            $("#insert_sex").val("")
+            $("#loadWordmodal").modal()
+        })
+
+        $("#submit_load_button").click(function () {
+
+            let startDate = $("#load_start_date").val()
+            let endDate = $("#load_end_date").val()
+            let query = JSON.stringify({
+                startDate: startDate,
+                endDate: endDate,
+                identify: 'student'
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "/down/downDoc.action",
+                dataType: "json",
+                contentType: "application/json",
+                data: query
+            }).done(function (response) {
+                console.log(response)
+                console.log(document.location.host)
+                let url = 'http://' + document.location.host + '/' + response['data']
+                console.log(url)
+                location.href = url;
+            })
+        })
+
+    });
 
 
-    })
+
 </script>
 </html>

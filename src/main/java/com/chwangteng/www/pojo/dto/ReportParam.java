@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
  **/
 @Data
 @NoArgsConstructor
-public class DateParam {
+public class ReportParam {
     private String startDate;
     private String endDate;
+    private String identify;
 }
