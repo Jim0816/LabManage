@@ -240,6 +240,13 @@ public class ReportController {
                 viewStudentsReportParam.setEndDate(reportParam.getEndDate());
             }
 
+            // 查询当前老师是否为责任老师, 如果不是责任老师
+            if (false){
+                currentteacher = 17;
+            }
+
+
+
             List<ReportWithBLOBs> reports = (List<ReportWithBLOBs>) reportService.viewStudentsReport(currentteacher, viewStudentsReportParam);
             if(reports!=null){
                 ModelAndView mv = new ModelAndView();
