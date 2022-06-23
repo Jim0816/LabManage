@@ -232,12 +232,18 @@ public class ReportController {
     public ModelAndView viewStudentsReport(HttpSession session, @RequestBody ReportParam reportParam){
         int currentteacher = Integer.parseInt(session.getAttribute(ConstVar._SESSION_USER_ID_).toString());
         int usertype = Integer.parseInt(session.getAttribute(ConstVar._SESSION_USER_TYPE_).toString());
+
         if(usertype==ConstVar._TEACHER_){
             ViewStudentsReportParam viewStudentsReportParam = null;
             if (reportParam != null && reportParam.getStartDate() != null && reportParam.getEndDate() != null){
                 viewStudentsReportParam = new ViewStudentsReportParam();
                 viewStudentsReportParam.setStartDate(reportParam.getStartDate());
                 viewStudentsReportParam.setEndDate(reportParam.getEndDate());
+            }
+            //判断老师是否是监管老师
+            Teacher teacher =teacherMapper.selectByPrimaryKey(currentteacher);
+            if (teacher.getIsSupervisor() != 1){
+                currentteacher = 17;
             }
 
             List<ReportWithBLOBs> reports = (List<ReportWithBLOBs>) reportService.viewStudentsReport(currentteacher, viewStudentsReportParam);
