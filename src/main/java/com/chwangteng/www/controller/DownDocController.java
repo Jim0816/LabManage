@@ -1,8 +1,10 @@
 package com.chwangteng.www.controller;
 
 import com.chwangteng.www.Utils.ConstVar;
+import com.chwangteng.www.mapper.TeacherMapper;
 import com.chwangteng.www.param.ViewStudentsReportParam;
 import com.chwangteng.www.pojo.ReportWithBLOBs;
+import com.chwangteng.www.pojo.Teacher;
 import com.chwangteng.www.pojo.consts.ReportConfig;
 import com.chwangteng.www.pojo.dto.ReportParam;
 import com.chwangteng.www.service.ReportService;
@@ -37,6 +39,9 @@ public class DownDocController {
     @Autowired
     StudentService studentService;
 
+    @Autowired
+    TeacherMapper teacherMapper;
+
     @RequestMapping("/downDoc.action")
     public ModelAndView downDoc(@RequestBody ReportParam reportParam, HttpServletRequest request, HttpSession session) throws IOException {
         List<ReportWithBLOBs> reports = null;
@@ -47,7 +52,11 @@ public class DownDocController {
             viewStudentsReportParam.setStartDate(reportParam.getStartDate());
             viewStudentsReportParam.setEndDate(reportParam.getEndDate());
         }
-
+        //判断老师是否是监管老师
+        Teacher teacher =teacherMapper.selectByPrimaryKey(id);
+        if (teacher.getIsSupervisor() != 1){
+            id = 17;
+        }
         if ("teacher".equals(reportParam.getIdentify())){
             // 教师下载周报
             reports = (List<ReportWithBLOBs>) reportService.viewStudentsReport(id, viewStudentsReportParam);
